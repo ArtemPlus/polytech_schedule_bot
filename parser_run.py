@@ -1,5 +1,5 @@
 from config import SEMESTR_START, BASE_URL
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from parser import start_parse
 from database.db import save_lesson, create_db
 
@@ -17,7 +17,8 @@ def build_url(target_date):
 
 def main():
     create_db()
-    number_week = current_this_week()
+    today = date.today()
+    number_week = current_this_week(date.isoformat(today)) 
     week1 = start_parse(number_week)
     week2 = start_parse(number_week+1)
     save_lesson(week1)
