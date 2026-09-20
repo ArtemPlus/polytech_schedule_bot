@@ -1,0 +1,8 @@
+.venv
+.env
+.vkbottle
+__pycache__/
+*.pyc
+database/database.db
+*.sqlite
+*.sqlite3
