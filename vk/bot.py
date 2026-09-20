@@ -3,7 +3,7 @@ from vkbottle.bot import MessageEvent
 from config import WEEK
 from dotenv import load_dotenv
 from os import getenv
-from database.db import get_lesson, track_user
+from database.db import get_lesson, track_user, create_db
 from formatter import format_day
 from parser_run import build_url
 from datetime import datetime, timedelta, date
@@ -49,21 +49,21 @@ async def hello(message):
 ])
     await message.answer(text)
 
-@bot.on.message(text=["Today", "today", "сегодня", "td", "Td"])
+@bot.on.message(text=["Today", "today", "сегодня", "td", "Td", "Сегодня"])
 async def cmd_td(message):
     await asyncio.to_thread(track_user, message.from_id)
     target_date = datetime.now().date()
     res = await make_answer(target_date) 
     await message.answer(res)
 
-@bot.on.message(text=["Tomorrow", "tomorrow", "tm", "завтра", "Tm"])
+@bot.on.message(text=["Tomorrow", "tomorrow", "tm", "завтра", "Tm", "Завтра"])
 async def cmd_tm(message):
     await asyncio.to_thread(track_user, message.from_id)
     target_date = datetime.now().date() + timedelta(days=1)
     res = await make_answer(target_date) 
     await message.answer(res)
 
-@bot.on.message(text=["week", "wk", "Wk", "неделя"])
+@bot.on.message(text=["week", "wk", "Wk", "неделя", "Неделя"])
 async def cmd_week(message):
     await asyncio.to_thread(track_user, message.from_id)
     today: date = date.today()
@@ -90,4 +90,5 @@ async def handle_week(event: MessageEvent):
     await event.edit_message(text, keyboard=keyboard)
     
 if __name__ == "__main__":
+    create_db()
     bot.run()
