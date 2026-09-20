@@ -37,11 +37,11 @@ def build_week_keyboard(target_date: date):
         keyboard.add(Callback("▶", payload={"cmd": "week", "date": next_day.isoformat()}))
     return keyboard.get_json()
 
-@bot.on.message(text=["start", "Start"])
+@bot.on.message(text=["start", "Start", "Начать"])
 async def hello(message):
     await asyncio.to_thread(track_user, message.from_id)
     text = "\n".join([
-    "Бот показывает расписание только для ИСТ-61 (пока)",
+    "Бот показывает расписание пока только для ИСТ-61",
     "======",
     "today, td, сегодня — расписание на сегодня",
     "tomorrow, tm, завтра — расписание на завтра",
