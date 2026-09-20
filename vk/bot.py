@@ -40,7 +40,9 @@ def build_week_keyboard(target_date: date):
 @bot.on.message(text="start")
 async def hello(message):
     await asyncio.to_thread(track_user, message.from_id)
-    await message.answer("today - расписание на сегодня")
+    await message.answer("today, Td, td, сегодня - расписание на сегодня\n \
+    tomorrow, Tm, tm, завтра - расписание на завтра\n \
+    week, Wk, wk, неделя")
 
 @bot.on.message(text=["Today", "today", "сегодня", "td", "Td"])
 async def cmd_td(message):
