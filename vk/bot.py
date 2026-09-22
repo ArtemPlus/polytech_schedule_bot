@@ -3,9 +3,9 @@ from vkbottle.bot import MessageEvent
 from config import WEEK
 from dotenv import load_dotenv
 from os import getenv
-from database.db import get_lesson, track_user, create_db
+from database.db import get_lesson, track_user, create_db, get_group_by_id, set_group_by_id
 from formatter import format_day
-from parser_run import build_url
+from parser_run import build_url, is_group_supported
 from datetime import datetime, timedelta, date
 import asyncio
 
@@ -13,15 +13,15 @@ load_dotenv()
 BOT_TOKEN = getenv("BOT_TOKEN")
 bot = Bot(BOT_TOKEN)
 
-async def make_answer(target_date: date):
+async def make_answer(target_date: date, group_name: str):
     day = target_date.weekday()
     if day == 6:
         return "Воскресенье - не учебный день!"
     day = WEEK[target_date.weekday()]
     target_date = target_date.isoformat()
-    schedule, group_name = await asyncio.to_thread(get_lesson, str(target_date))
+    schedule = await asyncio.to_thread(get_lesson, str(target_date), group_name)
     res = await asyncio.to_thread(format_day, schedule, day, group_name)
-    url = await asyncio.to_thread(build_url, target_date)
+    url = await asyncio.to_thread(build_url, target_date, group_name)
     res = res.replace("{{SOURCE}}", url)
     return res
 
@@ -37,33 +37,52 @@ def build_week_keyboard(target_date: date):
         keyboard.add(Callback("▶", payload={"cmd": "week", "date": next_day.isoformat()}))
     return keyboard.get_json()
 
-@bot.on.message(text=["start", "Start", "Начать"])
+@bot.on.message(text=["Начать"])
+async def cmd_begin(message):
+    text = "\n".join([
+        "Привет! Этот бот показывает расписание для выбранной группы. (пока только 1 и 2 курсов)",
+        "Показ расписания производится на основе данных с сайта БТИ.",
+        "Актуализация расписания в боте происходит каждые 6 часов, начиная с полуночи текущего дня."
+        "Для начала работы с ботом в ответном сообщении введи свою группу.",
+        "Вводи её официальное название, соблюдая регистр, например, ИСТ-61, КТМ-61 и т.д."
+    ])
+    await message.answer(text)
+
+@bot.on.message(text=["start", "Start"])
 async def hello(message):
     await asyncio.to_thread(track_user, message.from_id)
     text = "\n".join([
-    "Бот показывает расписание пока только для ИСТ-61",
+    "Бот показывает расписание пока только для групп первого/второго курса",
     "======",
-    "today, td, сегодня — расписание на сегодня",
-    "tomorrow, tm, завтра — расписание на завтра",
-    "week, wk, неделя — расписание на неделю",
+    "today, td, Td — расписание на сегодня",
+    "tomorrow, tm, Tm — расписание на завтра",
+    "week, wk, Wk — расписание на неделю",
 ])
     await message.answer(text)
 
-@bot.on.message(text=["Today", "today", "сегодня", "td", "Td", "Сегодня"])
+@bot.on.message(text=["Today", "today", "td", "Td"])
 async def cmd_td(message):
     await asyncio.to_thread(track_user, message.from_id)
     target_date = datetime.now().date()
-    res = await make_answer(target_date) 
+    group_name = get_group_by_id(message.from_id)
+    if group_name is None:
+        await message.answer("Сначала выбери группу")
+        return
+    res = await make_answer(target_date, group_name) 
     await message.answer(res)
 
-@bot.on.message(text=["Tomorrow", "tomorrow", "tm", "завтра", "Tm", "Завтра"])
+@bot.on.message(text=["Tomorrow", "tomorrow", "tm", "Tm"])
 async def cmd_tm(message):
     await asyncio.to_thread(track_user, message.from_id)
     target_date = datetime.now().date() + timedelta(days=1)
-    res = await make_answer(target_date) 
+    group_name = get_group_by_id(message.from_id)
+    if group_name is None:
+        await message.answer("Сначала выбери группу")
+        return
+    res = await make_answer(target_date, group_name) 
     await message.answer(res)
 
-@bot.on.message(text=["week", "wk", "Wk", "неделя", "Неделя"])
+@bot.on.message(text=["week", "wk", "Wk", "Week"])
 async def cmd_week(message):
     await asyncio.to_thread(track_user, message.from_id)
     today: date = date.today()
@@ -71,7 +90,11 @@ async def cmd_week(message):
         today = today + timedelta(days=1)
     else:
         today = today - timedelta(days=today.weekday())
-    text = await make_answer(today)
+    group_name = get_group_by_id(message.from_id)
+    if group_name is None:
+        await message.answer("Сначала выбери группу")
+        return
+    text = await make_answer(today, group_name)
     keyboard = build_week_keyboard(today)
     await message.answer(text, keyboard=keyboard)
 
@@ -84,10 +107,32 @@ async def handle_week(event: MessageEvent):
         user_id=event.user_id,
         peer_id=event.peer_id,
     )
+    group_name = get_group_by_id(event.user_id)
+    if group_name is None:
+        await event.answer("Сначала выбери группу")
+        return
     target_date: date = date.fromisoformat(event.payload.get("date"))
-    text = await make_answer(target_date)
+    text = await make_answer(target_date, group_name)
     keyboard = build_week_keyboard(target_date)
     await event.edit_message(text, keyboard=keyboard)
+
+@bot.on.message()
+async def handler(message):
+    if not message.text:
+        return
+    user_id = message.from_id
+    await asyncio.to_thread(track_user, user_id)
+    if await asyncio.to_thread(get_group_by_id, user_id):
+        await message.answer("Твоя группа уже в БД, либо команда введена неправильно. Пропиши Start/start, чтобы увидеть список доступных команд")
+    else:
+        if await asyncio.to_thread(is_group_supported, message.text.strip()):
+            group_name = message.text.strip()
+            await asyncio.to_thread(set_group_by_id, user_id, group_name)
+            await message.answer(f"Записал! Твоя группа - {group_name}. Введи Start/start для просмотра доступных команд")
+        else:
+            await message.answer("Такая группа не найдена. Попробуй ввести группу ещё раз")
+
+    
     
 if __name__ == "__main__":
     create_db()
