@@ -21,6 +21,7 @@ def is_group_supported(group_name):
     return group_name in GROUP_URL_MAP
 
 def main():
+    print(f"[{datetime.now()}] Парсер запущен")
     create_db()
     today = date.today()
     groups = list(GROUP_URL_MAP.keys())
@@ -35,6 +36,7 @@ def main():
         except Exception as error:
             print(f"{group_name} не сохрнилась из-за {error}")
         sleep(13)
+    print(f"[{datetime.now()}] Парсер завершен")
 
 
 if __name__ ==  "__main__":
