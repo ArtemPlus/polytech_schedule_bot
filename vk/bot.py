@@ -52,11 +52,11 @@ async def cmd_begin(message):
 async def hello(message):
     await asyncio.to_thread(track_user, message.from_id)
     text = "\n".join([
-    "Бот показывает расписание пока только для групп первого/второго курса",
+    "Бот показывает расписание пока только для групп первого/второго курса Технологического Факультета",
     "======",
-    "today, td, Td — расписание на сегодня",
-    "tomorrow, tm, Tm — расписание на завтра",
-    "week, wk, Wk — расписание на неделю",
+    "Today, today, td, Td — расписание на сегодня",
+    "Tomorrow, tomorrow, tm, Tm — расписание на завтра",
+    "Week, week, wk, Wk — расписание на неделю"
 ])
     await message.answer(text)
 
@@ -109,7 +109,7 @@ async def handle_week(event: MessageEvent):
     )
     group_name = get_group_by_id(event.user_id)
     if group_name is None:
-        await event.answer("Сначала выбери группу")
+        await event.answer("Для показа расписания выбери напиши свою группу, соблюдая регистр, например, ИСТ-61")
         return
     target_date: date = date.fromisoformat(event.payload.get("date"))
     text = await make_answer(target_date, group_name)
@@ -123,14 +123,14 @@ async def handler(message):
     user_id = message.from_id
     await asyncio.to_thread(track_user, user_id)
     if await asyncio.to_thread(get_group_by_id, user_id):
-        await message.answer("Твоя группа уже в БД, либо команда введена неправильно. Пропиши Start/start, чтобы увидеть список доступных команд")
+        await message.answer("Твоя группа уже в БД, либо команда введена неправильно. Пропиши Start или start (без / в начале), чтобы увидеть список доступных команд")
     else:
         if await asyncio.to_thread(is_group_supported, message.text.strip()):
             group_name = message.text.strip()
             await asyncio.to_thread(set_group_by_id, user_id, group_name)
-            await message.answer(f"Записал! Твоя группа - {group_name}. Введи Start/start для просмотра доступных команд")
+            await message.answer(f"Записал! Твоя группа - {group_name}. Введи Start или start (без / в начале) для просмотра доступных команд")
         else:
-            await message.answer("Такая группа не найдена. Попробуй ввести группу ещё раз")
+            await message.answer("Такая группа не найдена, либо к тебе ни привязана никакая группа. Попробуй ввести свою группу ещё раз, соблюдая регистр, например, ИСТ-61")
 
     
     
