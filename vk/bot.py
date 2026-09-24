@@ -56,8 +56,8 @@ async def hello(message):
     "======",
     "Today, today, td, Td -> расписание на сегодня",
     "Tomorrow, tomorrow, tm, Tm -> расписание на завтра",
-    "Week, week, wk, Wk -> расписание на неделю"
-    "======"
+    "Week, week, wk, Wk -> расписание на неделю",
+    "======",
     "Change, change, cg, Cg -> сбросить текущую группу и задать новую"
 ])
     await message.answer(text)
