@@ -3,7 +3,7 @@ from vkbottle.bot import MessageEvent
 from config import WEEK
 from dotenv import load_dotenv
 from os import getenv
-from database.db import get_lesson, track_user, create_db, get_group_by_id, set_group_by_id
+from database.db import get_lesson, track_user, create_db, get_group_by_id, set_group_by_id, reset_user_group
 from formatter import format_day
 from parser_run import build_url, is_group_supported
 from datetime import datetime, timedelta, date
@@ -54,11 +54,19 @@ async def hello(message):
     text = "\n".join([
     "Бот показывает расписание пока только для групп первого/второго курса Технологического Факультета",
     "======",
-    "Today, today, td, Td — расписание на сегодня",
-    "Tomorrow, tomorrow, tm, Tm — расписание на завтра",
-    "Week, week, wk, Wk — расписание на неделю"
+    "Today, today, td, Td -> расписание на сегодня",
+    "Tomorrow, tomorrow, tm, Tm -> расписание на завтра",
+    "Week, week, wk, Wk -> расписание на неделю"
+    "======"
+    "Change, change, cg, Cg -> сбросить текущую группу и задать новую"
 ])
     await message.answer(text)
+
+@bot.on.message(text=["Change", "change", "cg", "Cg"])
+async def cmd_change(message):
+    await asyncio.to_thread(track_user, message.from_id)
+    await asyncio.to_thread(reset_user_group, message.from_id)
+    await message.answer("Текущая группа сброшена. Напиши название группы, для которой ты хочешь получить расписание")
 
 @bot.on.message(text=["Today", "today", "td", "Td"])
 async def cmd_td(message):
@@ -123,7 +131,8 @@ async def handler(message):
     user_id = message.from_id
     await asyncio.to_thread(track_user, user_id)
     if await asyncio.to_thread(get_group_by_id, user_id):
-        await message.answer("Твоя группа уже в БД, либо команда введена неправильно. Пропиши Start или start (без / в начале), чтобы увидеть список доступных команд")
+        return
+        #await message.answer("Твоя группа уже в БД, либо команда введена неправильно. Пропиши Start или start (без / в начале), чтобы увидеть список доступных команд")
     else:
         if await asyncio.to_thread(is_group_supported, message.text.strip()):
             group_name = message.text.strip()

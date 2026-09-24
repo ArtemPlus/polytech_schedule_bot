@@ -118,6 +118,17 @@ def set_group_by_id(user_id: str, group_name: str, db_name=DB_PATH):
     finally:
         conn.close()
 
+def reset_user_group(user_id, db_name=DB_PATH):
+    conn = sqlite3.connect(db_name)
+    try:
+        with conn:
+            conn.execute('''
+                        UPDATE users SET group_name = NULL WHERE user_id = ?
+                         ''', (user_id,))
+            conn.commit()
+    finally:
+        conn.close()
+
 def track_user(user_id, db_name=DB_PATH):
     now = date.today().isoformat()
     conn = sqlite3.connect(db_name)
