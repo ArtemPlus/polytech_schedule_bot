@@ -56,7 +56,7 @@ async def hello(message):
     "======",
     "Today, today, td, Td -> расписание на сегодня",
     "Tomorrow, tomorrow, tm, Tm -> расписание на завтра",
-    "Week, week, wk, Wk -> расписание на неделю",
+    "Week, week, wk, Wk -> расписание на неделю (при выполнении комнады в сб/вс - будет показано расписание на следующую неделю)",
     "======",
     "Change, change, cg, Cg -> сбросить текущую группу и задать новую"
 ])
@@ -72,7 +72,7 @@ async def cmd_change(message):
 async def cmd_td(message):
     await asyncio.to_thread(track_user, message.from_id)
     target_date = datetime.now().date()
-    group_name = get_group_by_id(message.from_id)
+    group_name = await asyncio.to_thread(get_group_by_id, message.from_id)
     if group_name is None:
         await message.answer("Сначала выбери группу")
         return
@@ -83,7 +83,7 @@ async def cmd_td(message):
 async def cmd_tm(message):
     await asyncio.to_thread(track_user, message.from_id)
     target_date = datetime.now().date() + timedelta(days=1)
-    group_name = get_group_by_id(message.from_id)
+    group_name = await asyncio.to_thread(get_group_by_id, message.from_id)
     if group_name is None:
         await message.answer("Сначала выбери группу")
         return
@@ -94,11 +94,11 @@ async def cmd_tm(message):
 async def cmd_week(message):
     await asyncio.to_thread(track_user, message.from_id)
     today: date = date.today()
-    if today.weekday() == 6:
-        today = today + timedelta(days=1)
+    if today.weekday() in (5, 6):
+        today = (today - timedelta(days=today.weekday())) + timedelta(days=7)
     else:
         today = today - timedelta(days=today.weekday())
-    group_name = get_group_by_id(message.from_id)
+    group_name = await asyncio.to_thread(get_group_by_id, message.from_id)
     if group_name is None:
         await message.answer("Сначала выбери группу")
         return
