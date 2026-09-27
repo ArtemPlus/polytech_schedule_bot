@@ -3,7 +3,7 @@ from vkbottle.bot import MessageEvent
 from config import WEEK
 from dotenv import load_dotenv
 from os import getenv
-from database.db import get_lesson, track_user, create_db, get_group_by_id, set_group_by_id, reset_user_group
+from database.db import get_lesson, track_user, create_db, get_group_by_id, set_group_by_id, reset_user_group, get_active_user
 from formatter import format_day
 from parser_run import build_url, is_group_supported
 from datetime import datetime, timedelta, date
@@ -11,6 +11,7 @@ import asyncio
 
 load_dotenv()
 BOT_TOKEN = getenv("BOT_TOKEN")
+ADMIN_ID = getenv("ADMIN_ID")
 bot = Bot(BOT_TOKEN)
 
 async def make_answer(target_date: date, group_name: str):
@@ -37,6 +38,7 @@ def build_week_keyboard(target_date: date):
         keyboard.add(Callback("▶", payload={"cmd": "week", "date": next_day.isoformat()}))
     return keyboard.get_json()
 
+# -- Handler command
 @bot.on.message(text=["Начать"])
 async def cmd_begin(message):
     text = "\n".join([
@@ -106,6 +108,21 @@ async def cmd_week(message):
     keyboard = build_week_keyboard(today)
     await message.answer(text, keyboard=keyboard)
 
+# -- Admin command
+@bot.on.message(text=["Stat", "stat"])
+async def cmd_stat(message):
+    if str(message.from_id) == ADMIN_ID:
+        info_week = get_active_user(7)
+        info_three_days = get_active_user(3)
+        info_all = get_active_user(10**6)
+        text = "\n".join([f"За последнюю неделю активных пользователей - {len(info_week)}", 
+                          f"За последние три дня активных пользователей - {len(info_three_days)}",
+                          f"Всего пользовавшихся - {len(info_all)}"])
+        await message.answer(text)
+    else:
+        await message.answer("Данная команда является административной")
+
+# -- Handler event
 @bot.on.raw_event(GroupEventType.MESSAGE_EVENT, dataclass=MessageEvent)
 async def handle_week(event: MessageEvent):
     if event.payload.get("cmd") != "week":

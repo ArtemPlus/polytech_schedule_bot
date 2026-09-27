@@ -144,3 +144,16 @@ def track_user(user_id, db_name=DB_PATH):
             )
     finally:
         conn.close()
+
+def get_active_user(period, db_name=DB_PATH):
+    conn = sqlite3.connect(db_name)
+    try:
+        with conn:
+            res = conn.execute('''
+                                SELECT user_id 
+                                FROM users 
+                                WHERE abs(CAST(julianday(date(last_seen))-julianday(date('now')) AS INTEGER))<?
+                               ''', (period, ))
+            return res.fetchall()
+    finally:
+        conn.close()
