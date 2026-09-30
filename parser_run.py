@@ -23,24 +23,35 @@ def is_group_supported(group_name):
 
 def main():
     print(f"[{datetime.now()}] Парсер запущен")
-    create_db()
-    today = date.today()
-    groups = list(GROUP_URL_MAP.keys())
-    number_week = current_this_week(today.isoformat()) 
-    for group_name in groups:
-        try:
-            if today.weekday() in (5, 6):
-                week = start_parse(number_week+1, group_name)
-                save_lesson(week, group_name)
-                print(f"{group_name}: Недели {number_week} и {number_week + 1} сохранены")
-            else:
-                week = start_parse(number_week, group_name)
-                save_lesson(week, group_name)
-                print(f"{group_name}: Неделя {number_week} сохранена")
-        except Exception as error:
-            print(f"{group_name} не сохранилась из-за {error}")
-        sleep(randint(10, 20))
-    print(f"[{datetime.now()}] Парсер завершен")
+    stat_error = False
+    try:
+        create_db()
+        today = date.today()
+        groups = list(GROUP_URL_MAP.keys())
+        number_week = current_this_week(today.isoformat()) 
+        for group_name in groups:
+            weeks = []
+            try:
+                if 0 <= today.weekday() <= 3:
+                    weeks.append(number_week)
+                elif today.weekday() in (4, 5):
+                    weeks.append(number_week)
+                    weeks.append(number_week+1)
+                else:
+                    weeks.append(number_week+1)
+                for num_week in weeks:
+                    week = start_parse(num_week, group_name)
+                    save_lesson(week, group_name)
+                    print(f"{group_name}: Неделя {num_week} сохранены")
+            except Exception as error_group:
+                print(f"{group_name} не сохранилась из-за {error_group}")
+            sleep(randint(10, 20))
+    except Exception as error:
+        stat_error = True
+    if stat_error:
+        print(f"[{datetime.now()}] Парсер завершен успешно")
+    else:
+        print(f"Парсер либо бд упали из-за {error}")
 
 
 if __name__ ==  "__main__":

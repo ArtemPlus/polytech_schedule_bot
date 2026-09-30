@@ -21,6 +21,8 @@ async def make_answer(target_date: date, group_name: str):
     day = WEEK[target_date.weekday()]
     target_date = target_date.isoformat()
     schedule = await asyncio.to_thread(get_lesson, str(target_date), group_name)
+    if not any(schedule.values()):
+        return "Вероятно, произошла ошибка, и расписание для этой группы отсутсвует"
     res = await asyncio.to_thread(format_day, schedule, day, group_name)
     url = await asyncio.to_thread(build_url, target_date, group_name)
     res = res.replace("{{SOURCE}}", url)
