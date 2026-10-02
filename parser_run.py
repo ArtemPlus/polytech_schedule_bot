@@ -47,11 +47,11 @@ def main():
                 print(f"{group_name} не сохранилась из-за {error_group}")
             sleep(randint(10, 20))
     except Exception as error:
+        print(f"[{datetime.now()}] Парсер либо бд упали из-за {error}")
         stat_error = True
-    if stat_error:
+    if not(stat_error):
         print(f"[{datetime.now()}] Парсер завершен успешно")
-    else:
-        print(f"Парсер либо бд упали из-за {error}")
+        
 
 
 if __name__ ==  "__main__":
