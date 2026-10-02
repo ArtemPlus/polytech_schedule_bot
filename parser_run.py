@@ -1,7 +1,8 @@
-from config import SEMESTR_START, BASE_URL, GROUP_URL_MAP
+from config import SEMESTR_START, BASE_URL, GROUP_LIST
 from datetime import datetime, timedelta, date
 from parser import start_parse
 from time import sleep
+from requests import Request
 from random import randint
 from database.db import save_lesson, create_db
 
@@ -14,12 +15,14 @@ def current_this_week(isodate: datetime.date):
     return number_week
 
 def build_url(target_date, group_name):
-    url = BASE_URL.replace("{{group}}", GROUP_URL_MAP[group_name])
-    url = url + str(current_this_week(target_date))
-    return url
+    num_week = current_this_week(target_date)
+    params = {"name_group_dl": group_name.encode("ISO-8859-5"), "cury": "2026", "cursem": "1", "ned_dl": num_week}
+    obj = Request("GET", BASE_URL, params=params).prepare()
+    return obj.url
+
 
 def is_group_supported(group_name):
-    return group_name in GROUP_URL_MAP
+    return group_name in GROUP_LIST
 
 def main():
     print(f"[{datetime.now()}] Парсер запущен")
@@ -27,9 +30,8 @@ def main():
     try:
         create_db()
         today = date.today()
-        groups = list(GROUP_URL_MAP.keys())
         number_week = current_this_week(today.isoformat()) 
-        for group_name in groups:
+        for group_name in GROUP_LIST:
             weeks = []
             try:
                 if 0 <= today.weekday() <= 3:

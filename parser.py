@@ -1,11 +1,10 @@
 import requests
 from bs4 import BeautifulSoup
-from config import WEEK, BASE_URL, GROUP_URL_MAP, ROOMS
+from config import WEEK, BASE_URL, ROOMS
 
 def get_html(num_week, group_name):
-    url = BASE_URL.replace("{{group}}", GROUP_URL_MAP[group_name])
-    url = url + str(num_week)
-    response = requests.get(url, timeout=10)
+    params = {"name_group_dl": group_name.encode("ISO-8859-5"), "cury": "2026", "cursem": "1", "ned_dl": num_week}
+    response = requests.get(BASE_URL, timeout=10, params=params)
     soup = BeautifulSoup(response.text, 'lxml')
     list_lessons = soup.find('table', class_="table align-middle")
     dates = get_date_on_week(list_lessons)

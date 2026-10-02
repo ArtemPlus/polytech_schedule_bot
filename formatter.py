@@ -13,21 +13,24 @@ def append_info_about_pair(lines, pair):
         lines.append(" ")
 
 def format_day(lessons: list[dict], day: str, group_name):
-    day_lesson = lessons[day]
-    lines = []
-    date_today = day_lesson[0]["date"]
-    normal_date_today = date.fromisoformat(date_today)
-    lines.append(f"📅 {day} - {normal_date_today.day} {MONTH[normal_date_today.month]} {normal_date_today.year}")
-    lines.append(f"📚 Учебная неделя - {current_this_week(normal_date_today)}")
-    lines.append(f"👥 Учебная группа - {group_name}")
-    lines.append("----")
-    for pair in day_lesson:
-        if pair["subject"] is None:
-            lines.append(f"{pair['number']}. {BELL_TIMES[pair['number']]} - ❌ Пары нет")
-            if str(pair["number"]) != "8":
-                lines.append(" ")
-        else:
-            append_info_about_pair(lines, pair)
+    try:
+        day_lesson = lessons[day]
+        lines = []
+        date_today = day_lesson[0]["date"]
+        normal_date_today = date.fromisoformat(date_today)
+        lines.append(f"📅 {day} - {normal_date_today.day} {MONTH[normal_date_today.month]} {normal_date_today.year}")
+        lines.append(f"📚 Учебная неделя - {current_this_week(normal_date_today)}")
+        lines.append(f"👥 Учебная группа - {group_name}")
+        lines.append("----")
+        for pair in day_lesson:
+            if pair["subject"] is None:
+                lines.append(f"{pair['number']}. {BELL_TIMES[pair['number']]} - ❌ Пары нет")
+                if str(pair["number"]) != "8":
+                    lines.append(" ")
+            else:
+                append_info_about_pair(lines, pair)
+    except Exception as error:
+        print(f"Форматтер упал из-за {error}")
                 
     lines.append("----")
     lines.append("Посмотреть оригинал расписания на сайте БТИ - {{SOURCE}}")

@@ -21,9 +21,8 @@ MONTH = {
 
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "database" / "database.db"
-BASE_URL = "http://db.biysk.secna.ru/schedule/schedule.test_r.timetable_teacher?name_group_dl={{group}}&cury=2026&cursem=1&ned_dl="
-GROUP_URL_MAP = {"аИИП-61": "%D0%B8%B8%BF-61", "аММ-61": "%D0%BC%BC-61", "БТ-61": "%B1%C2-61", "ИСТ-61": "%B8%C1%C2-61", "ИСТ-62": "%B8%C1%C2-62", "КТМ-61": "%BA%C2%BC-61", "мБТ-61": "%DC%B1%C2-61", "ПС-61": "%BF%C1-61", "С-61": "%C1-61",
-                 "БТ-51": "%B1%C2-51", "ИСТ-51": "%B8%C1%C2-51", "КТМ-51": "%BA%C2%BC-51", "мБТ-51": "%DC%B1%C2-51", "мИСТ-51": "%DC%B8%C1%C2-51", "ПС-51": "%BF%C1-51", "С-51": "%C1-51"}
+BASE_URL = "http://db.biysk.secna.ru/schedule/schedule.test_r.timetable_teacher?"
+GROUP_LIST = ['аИИП-61', 'аММ-61', 'БТ-61', 'ИСТ-61', 'ИСТ-62', 'КТМ-61', 'мБТ-61', 'ПС-61', 'С-61', 'БТ-51', 'ИСТ-51', 'КТМ-51', 'мБТ-51', 'мИСТ-51', 'ПС-51', 'С-51']
 ROOMS = {
     "01Б", "02Б",
     "101Б", "103Б", "105А", "110Б", "111Б", "117Б", "117/2Б", "119-I-Б",
