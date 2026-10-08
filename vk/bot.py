@@ -1,6 +1,6 @@
 from vkbottle import Bot, Keyboard, Callback, GroupEventType
 from vkbottle.bot import MessageEvent
-from config import WEEK
+from config import WEEK, MATERIALS
 from dotenv import load_dotenv
 from os import getenv
 from database.db import get_lesson, track_user, create_db, get_group_by_id, set_group_by_id, reset_user_group, get_active_user
@@ -62,7 +62,8 @@ async def hello(message):
     "Tomorrow, tomorrow, tm, Tm -> расписание на завтра",
     "Week, week, wk, Wk -> расписание на неделю (при выполнении комнады в сб/вс - будет показано расписание на следующую неделю)",
     "======",
-    "Change, change, cg, Cg -> сбросить текущую группу и задать новую"
+    "Change, change, cg, Cg -> сбросить текущую группу и задать новую",
+    "mt, Mt, materials, Materials - ссылки на учебники и методички"
 ])
     await message.answer(text)
 
@@ -109,6 +110,15 @@ async def cmd_week(message):
     text = await make_answer(today, group_name)
     keyboard = build_week_keyboard(today)
     await message.answer(text, keyboard=keyboard)
+
+@bot.on.message(text=["Mt", "mt", "materials", "Materials"])
+async def cmd_materials(message):
+    await asyncio.to_thread(track_user, message.from_id)
+    text = []
+    for lesson in MATERIALS:
+        text.append(": ".join([lesson, MATERIALS[lesson]]))
+        text.append("\n")
+    await message.answer("".join(text))
 
 # -- Admin command
 @bot.on.message(text=["Stat", "stat"])

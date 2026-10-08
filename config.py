@@ -37,3 +37,8 @@ ROOMS = {
 }
 
 SEMESTR_START = date(2026, 8, 31)
+MATERIALS = {"Вышмат. Клетеник": "https://lib.ysu.am/disciplines_bk/d108c870d37d60bb70389462b4bfc171.pdf",
+             "ОРГ. Методичка": "https://disk.yandex.ru/i/bUOZcjt7SKwrcw",
+             "История России. Методичка": "https://disk.yandex.ru/i/f0V2dCNn8rh97g",
+             "История России. Учебник": "https://фумо05.рф/edumat/CH/CH01/Petrov_History_Russia.pdf?ysclid=muzpp71i7e495997627",
+             "Английский. Учебник Андрианова": "https://disk.yandex.ru/i/JzlBx9Guvvv7mA"}
