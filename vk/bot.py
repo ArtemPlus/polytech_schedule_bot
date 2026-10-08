@@ -40,7 +40,7 @@ def build_week_keyboard(target_date: date):
         keyboard.add(Callback("▶", payload={"cmd": "week", "date": next_day.isoformat()}))
     return keyboard.get_json()
 
-# -- Handler command
+# -- User command
 @bot.on.message(text=["Начать"])
 async def cmd_begin(message):
     text = "\n".join([
@@ -57,6 +57,7 @@ async def hello(message):
     await asyncio.to_thread(track_user, message.from_id)
     text = "\n".join([
     "Бот показывает расписание пока только для групп первого/второго курса Технологического Факультета",
+    "Актуализация расписания в боте происходит каждые 6 часов, начиная с полуночи текущего дня."
     "======",
     "Today, today, td, Td -> расписание на сегодня",
     "Tomorrow, tomorrow, tm, Tm -> расписание на завтра",
@@ -151,7 +152,6 @@ async def handler(message):
     await asyncio.to_thread(track_user, user_id)
     if await asyncio.to_thread(get_group_by_id, user_id):
         return
-        #await message.answer("Твоя группа уже в БД, либо команда введена неправильно. Пропиши Start или start (без / в начале), чтобы увидеть список доступных команд")
     else:
         if await asyncio.to_thread(is_group_supported, message.text.strip()):
             group_name = message.text.strip()

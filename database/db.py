@@ -157,3 +157,20 @@ def get_active_user(period, db_name=DB_PATH):
             return res.fetchall()
     finally:
         conn.close()
+
+def get_lesson_by_teacher(teacher, db_name=DB_PATH):
+    conn = sqlite3.connect(db_name)
+    conn.row_factory = sqlite3.Row
+    now = date.today()
+    monday = (now - timedelta(now.weekday())).isoformat()
+    try:
+        res = conn.execute(f'''
+                                SELECT group_name, number, date, type, subject, subgroup, teacher, cabinet
+                               FROM lessons 
+                               WHERE teacher LIKE ? AND 
+                               date>=?
+                               ORDER BY date, number
+                               ''', (f"%{teacher}%", f"{monday}"))
+        return [dict(r) for r in res.fetchall()]
+    finally:
+        conn.close()

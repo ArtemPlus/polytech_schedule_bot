@@ -20,7 +20,6 @@ def build_url(target_date, group_name):
     obj = Request("GET", BASE_URL, params=params).prepare()
     return obj.url
 
-
 def is_group_supported(group_name):
     return group_name in GROUP_LIST
 
