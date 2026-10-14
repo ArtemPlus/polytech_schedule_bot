@@ -21,6 +21,7 @@ def parse_string_info(normalized, subgroup=None):
             cabinet = normalized[i]
             break
     if cabinet is None:
+        print(normalized)
         return None
     if subgroup is not None:
         return int(subgroup), teacher.strip(), cabinet

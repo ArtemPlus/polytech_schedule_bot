@@ -3,7 +3,7 @@ from vkbottle.bot import MessageEvent
 from config import WEEK, MATERIALS
 from dotenv import load_dotenv
 from os import getenv
-from database.db import get_lesson, track_user, create_db, get_group_by_id, set_group_by_id, reset_user_group, get_active_user
+from database.db import get_lesson, track_user, create_db, get_group_by_id, set_group_by_id, reset_user_group, get_active_user, get_last_update
 from formatter import format_day
 from parser_run import build_url, is_group_supported
 from datetime import datetime, timedelta, date
@@ -19,11 +19,12 @@ async def make_answer(target_date: date, group_name: str):
     if day == 6:
         return "Воскресенье - не учебный день!"
     day = WEEK[target_date.weekday()]
+    last_update = get_last_update(group_name)
     target_date = target_date.isoformat()
     schedule = await asyncio.to_thread(get_lesson, str(target_date), group_name)
     if not any(schedule.values()):
         return "Вероятно, произошла ошибка, и расписание для этой группы отсутсвует"
-    res = await asyncio.to_thread(format_day, schedule, day, group_name)
+    res = await asyncio.to_thread(format_day, schedule, day, group_name, last_update)
     url = await asyncio.to_thread(build_url, target_date, group_name)
     res = res.replace("{{SOURCE}}", url)
     return res

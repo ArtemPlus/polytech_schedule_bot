@@ -1,5 +1,5 @@
 import sqlite3
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from config import WEEK, DB_PATH
 
 
@@ -28,6 +28,12 @@ def create_db(db_name=DB_PATH):
     );
                    ''')
     cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS updates (
+                   group_name TEXT PRIMARY KEY,
+                   last_update TEXT NOT NULL
+                   );
+                   ''')
+    cursor.execute('''
     CREATE INDEX IF NOT EXISTS idx_lessons_group_date
     ON lessons(group_name, date);
                    ''')
@@ -47,6 +53,7 @@ def prepare_data(schedule, group_info):
 
 def save_lesson(schedule, group_info, db_name=DB_PATH):
     connection = sqlite3.connect(db_name)
+    now = datetime.now().isoformat()
     try:
         rows, dates = prepare_data(schedule, group_info)
         connection.row_factory = sqlite3.Row
@@ -58,6 +65,13 @@ def save_lesson(schedule, group_info, db_name=DB_PATH):
                         (group_name, number, date, type, subject, subgroup, teacher, cabinet) 
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                         ''', rows)
+        cursor.execute('''
+                        INSERT INTO updates 
+                       (group_name, last_update)
+                       VALUES (?, ?)
+                       ON CONFLICT(group_name) DO UPDATE SET last_update = excluded.last_update
+                       ''',
+                    (group_info, now))
         connection.commit()
     finally:
         connection.close()
@@ -155,5 +169,18 @@ def get_active_user(period, db_name=DB_PATH):
                                 WHERE abs(CAST(julianday(date(last_seen))-julianday(date('now')) AS INTEGER))<?
                                ''', (period, ))
             return res.fetchall()
+    finally:
+        conn.close()
+
+def get_last_update(group_name, db_name=DB_PATH):
+    conn = sqlite3.connect(db_name)
+    try:
+        with conn:
+            res = conn.execute('''
+                               SELECT last_update
+                               FROM updates
+                               WHERE group_name=?
+                               ''', (group_name,))
+            return res.fetchone()
     finally:
         conn.close()
