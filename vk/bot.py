@@ -100,7 +100,7 @@ async def cmd_tm(message):
 async def cmd_week(message):
     await asyncio.to_thread(track_user, message.from_id)
     today: date = date.today()
-    if today.weekday() in (5, 6):
+    if today.weekday() in (4, 5, 6):
         today = (today - timedelta(days=today.weekday())) + timedelta(days=7)
     else:
         today = today - timedelta(days=today.weekday())
