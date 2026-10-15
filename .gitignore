@@ -4,6 +4,7 @@
 __pycache__/
 *.pyc
 database/database.db
+*.json
 *.sqlite
 *.sqlite3
 database.db.bak

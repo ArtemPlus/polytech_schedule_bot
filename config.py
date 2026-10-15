@@ -1,4 +1,5 @@
 from pathlib import Path
+from json import loads
 from datetime import date
 
 BELL_TIMES = {
@@ -22,7 +23,10 @@ MONTH = {
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "database" / "database.db"
 BASE_URL = "http://db.biysk.secna.ru/schedule/schedule.test_r.timetable_teacher?"
-GROUP_LIST = ['аИИП-61', 'аММ-61', 'БТ-61', 'ИСТ-61', 'ИСТ-62', 'КТМ-61', 'мБТ-61', 'ПС-61', 'С-61', 'БТ-51', 'ИСТ-51', 'КТМ-51', 'мБТ-51', 'мИСТ-51', 'ПС-51', 'С-51']
+
+with open(BASE_DIR/"groups.json", encoding="UTF-8") as file:
+    GROUP_LIST = loads(file.read().strip())
+
 ROOMS = {
     "01Б", "02Б",
     "101Б", "103Б", "105А", "110Б", "111Б", "117Б", "117/2Б", "119-I-Б",
