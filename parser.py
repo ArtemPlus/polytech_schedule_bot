@@ -20,7 +20,7 @@ def parse_string_info(normalized, subgroup=None):
                 teacher = teacher + normalized[j] + " "
             cabinet = normalized[i]
             break
-    if cabinet is None:
+    if not cabinet:
         print(normalized)
         return None
     if subgroup is not None:
