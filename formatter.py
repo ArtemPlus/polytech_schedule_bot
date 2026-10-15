@@ -22,7 +22,7 @@ def format_day(lessons: list[dict], day: str, group_name, last_update):
         lines.append(f"📅 {day} - {normal_date_today.day} {MONTH[normal_date_today.month]} {normal_date_today.year}")
         lines.append(f"📚 Учебная неделя - {current_this_week(normal_date_today)}")
         lines.append(f"👥 Учебная группа - {group_name}")
-        lines.append(f"📌 Расписание актуально на {last_update.day} {MONTH[last_update.month]} {last_update.hour}:{last_update.minute}")
+        lines.append(f"📌 Расписание актуально на {last_update.day} {MONTH[last_update.month]} {last_update.strftime('%H:%M')}")
         lines.append("----")
         for pair in day_lesson:
             if pair["subject"] is None:
@@ -37,7 +37,6 @@ def format_day(lessons: list[dict], day: str, group_name, last_update):
     lines.append("----")
     lines.append("Посмотреть оригинал расписания на сайте БТИ - {{SOURCE}}")
     return "\n".join(lines)
-
 # def format_search(lessons):
 #     for lesson in lessons:
 #         if lesson["date"] != current_date:
