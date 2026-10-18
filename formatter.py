@@ -1,6 +1,9 @@
+import logging
 from config import BELL_TIMES, MONTH
 from datetime import date, datetime
 from parser_run import current_this_week
+
+logger = logging.getLogger(__name__)
 
 def append_info_about_pair(lines, pair):    
     lines.append(f"{pair['number']}. {BELL_TIMES[pair['number']]} - {pair['subject']}")
@@ -31,9 +34,9 @@ def format_day(lessons: list[dict], day: str, group_name, last_update):
                     lines.append(" ")
             else:
                 append_info_about_pair(lines, pair)
-    except Exception as error:
-        print(f"Форматтер упал из-за {error}")
-                
+    except Exception:
+        logger.exception("Форматтер упал для группы %s (день %s)", group_name, day)
+        return "Произошла ошибка при оформлении расписания, попробуй позже"
     lines.append("----")
     lines.append("Посмотреть оригинал расписания на сайте БТИ - {{SOURCE}}")
     return "\n".join(lines)

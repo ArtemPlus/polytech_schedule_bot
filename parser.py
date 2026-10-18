@@ -1,10 +1,15 @@
+import logging
 import requests
 from bs4 import BeautifulSoup
 from config import WEEK, BASE_URL, ROOMS
 
+logger = logging.getLogger(__name__)
+
 def get_html(num_week, group_name):
     params = {"name_group_dl": group_name.encode("ISO-8859-5"), "cury": "2026", "cursem": "1", "ned_dl": num_week}
     response = requests.get(BASE_URL, timeout=10, params=params)
+    logger.debug("Запрос к сайту: %s", response.url)
+    response.raise_for_status()
     soup = BeautifulSoup(response.text, 'lxml')
     list_lessons = soup.find('table', class_="table align-middle")
     dates = get_date_on_week(list_lessons)
@@ -21,7 +26,6 @@ def parse_string_info(normalized, subgroup=None):
             cabinet = normalized[i]
             break
     if not cabinet:
-        print(normalized)
         return None
     if subgroup is not None:
         return int(subgroup), teacher.strip(), cabinet
@@ -33,7 +37,7 @@ def get_data_from_info_lesson(info_lesson: str):
         normalized = normalized.split(" ")
         result = parse_string_info(normalized)
         if result is None:
-            print(f"Кабинет не найден: {info_lesson}")
+            logger.warning("Кабинет не найден: %s", info_lesson)
             return None, " ".join(normalized), None
         teacher, cabinet = result
         return None, teacher, cabinet

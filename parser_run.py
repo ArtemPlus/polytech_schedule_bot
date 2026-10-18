@@ -1,3 +1,4 @@
+import logging
 from config import SEMESTR_START, BASE_URL, GROUP_LIST
 from datetime import datetime, timedelta, date
 from parser import start_parse
@@ -5,6 +6,9 @@ from time import sleep
 from requests import Request
 from random import randint
 from database.db import save_lesson, create_db
+from log_config import setup_logging
+
+logger = logging.getLogger(__name__)
 
 def current_this_week(isodate: datetime.date):
     today =  datetime.fromisoformat(str(isodate))
@@ -25,7 +29,8 @@ def is_group_supported(group_name):
     return group_name in GROUP_LIST
 
 def main():
-    print(f"[{datetime.now()}] Парсер запущен")
+    setup_logging()
+    logger.info("Парсер запущен")
     stat_error = False
     try:
         create_db()
@@ -44,15 +49,15 @@ def main():
                 for num_week in weeks:
                     week = start_parse(num_week, group_name)
                     save_lesson(week, group_name)
-                    print(f"{group_name}: Неделя {num_week} сохранены")
+                    logger.info("%s: Неделя %s сохранена", group_name, num_week)
             except Exception as error_group:
-                print(f"{group_name} не сохранилась из-за {error_group}")
+                logger.error("Группа %s не сохранилась из-за %s", group_name, error_group, exc_info=True)
             sleep(randint(10, 20))
     except Exception as error:
-        print(f"[{datetime.now()}] Парсер либо бд упали из-за {error}")
+        logger.error("Парсер либо бд упали из-за %s", error, exc_info=True)
         stat_error = True
     if not(stat_error):
-        print(f"[{datetime.now()}] Парсер завершен успешно")
+        logger.info("Парсер завершен успешно")
         
 
 

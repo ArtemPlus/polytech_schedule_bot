@@ -1,6 +1,10 @@
+import logging
 import requests
 from json import dumps
 from bs4 import BeautifulSoup
+from log_config import setup_logging
+
+logger = logging.getLogger(__name__)
 
 base_url = "http://db.biysk.secna.ru/schedule/schedule.test_r.search_fak?"
 
@@ -19,8 +23,8 @@ def get_all_group():
             response = requests.get(base_url, timeout=10, params={"name_dl": faculty.encode('ISO-8859-5'), "cury": "2026", "cursem": "1"})
             soup = BeautifulSoup(response.text, 'lxml')
             return soup
-        except Exception as e:
-            print(f"Ошибка при запросе: {e}")
+        except Exception as error:
+            logger.error("Ошибка при запросе: %s", error, exc_info=True)
             return None
 
     list_group = [*_get_name_group(_get_html_group("Технологический")), *_get_name_group(_get_html_group("Инженерный"))]
@@ -34,4 +38,5 @@ def save_list_group(list_group):
     return "В файл нечего записывать"
 
 if __name__ == "__main__":
+    setup_logging()
     save_list_group(get_all_group())

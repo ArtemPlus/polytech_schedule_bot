@@ -7,7 +7,11 @@ from database.db import get_lesson, track_user, create_db, get_group_by_id, set_
 from formatter import format_day
 from parser_run import build_url, is_group_supported
 from datetime import datetime, timedelta, date
+from log_config import setup_logging
 import asyncio
+import logging
+
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 BOT_TOKEN = getenv("BOT_TOKEN")
@@ -174,5 +178,7 @@ async def handler(message):
     
     
 if __name__ == "__main__":
+    setup_logging()
     create_db()
+    logger.info("Бот запущен")
     bot.run()
